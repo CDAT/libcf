@@ -1,0 +1,142 @@
+#!/usr/bin/env python
+#
+# Python installation script
+# $Id: setup.py.in 931 2012-07-10 21:42:15Z pletzer $
+#
+# Python installation script. Will install the shared library 
+# and libCFConfig.py in the directory where python puts its 
+# modules (generally /usr/lib/python<VERSION>/site-packages. 
+# setup.py will be created upon configuring, with some autoconf
+# settings filled in when configuring.
+#
+
+from distutils.core import setup, Extension
+import types
+import re
+import glob
+import os.path
+
+
+# constants
+PAT_LIBDIR = re.compile(r'^-L')      # UNIX
+PAT_LIBRARY = re.compile(r'^-l')     # UNIX
+PAT_UNIT_TEST = re.compile(r'tst_')  # our way of distinguishing unit tests
+
+# list all the directories that contain source file to be compiled 
+# into a shared library
+EXTDIRS = ['@abs_srcdir@/src', 
+           '@abs_srcdir@/gridspec_api/global',
+           '@abs_srcdir@/gridspec_api/axis',
+           '@abs_srcdir@/gridspec_api/coord',
+           '@abs_srcdir@/gridspec_api/grid',
+           '@abs_srcdir@/gridspec_api/data',
+           '@abs_srcdir@/gridspec_api/regrid',
+           '@abs_srcdir@/gridspec_api/mosaic',
+           '@abs_srcdir@/gridspec_api/host',
+]
+
+LIBS = "@LIBS@"
+
+def findNetcdfIncludeDir():
+    # assumes -I <path>
+    incdirs = re.sub(r'\-I\s*', ' ', "@CPPFLAGS@").split()
+    for d in incdirs:
+        if os.path.exists(d + '/netcdf.h'):
+            return d
+    return ''
+
+netcdfinc = findNetcdfIncludeDir()
+if not netcdfinc:
+    print '*** error: could not find netcdf.h file in CPPFLAGS'
+    sys.exit(1)
+
+# list all the include directories
+incdirs = [netcdfinc,
+           '@abs_srcdir@/include', 
+           '@abs_srcdir@/src',
+           '@abs_srcdir@/gridspec_api/global',
+           '@abs_srcdir@/gridspec_api/axis',
+           '@abs_srcdir@/gridspec_api/coord',
+           '@abs_srcdir@/gridspec_api/grid',
+           '@abs_srcdir@/gridspec_api/data',
+           '@abs_srcdir@/gridspec_api/regrid',
+           '@abs_srcdir@/gridspec_api/mosaic',
+           '@abs_srcdir@/gridspec_api/host',
+           '@abs_builddir@',] # config.h
+
+def contractPath(path):
+    """
+    Remove ../ from the path
+    """
+    return re.sub(r'\/[^\/]+\/\.\.', '', path)
+
+def getLibraryDirs(libs):
+    """
+    Extract the library paths from string libs
+    """
+    res = []
+    for word in libs.split():
+        if re.match(PAT_LIBDIR, word):
+            res.append( re.sub(PAT_LIBDIR, '', word) )
+    return res
+
+def getLibraries(libs):
+    """
+    Extract the list of libraries to link against from string libs
+    """
+    res = []
+    for word in libs.split():
+        if re.match(PAT_LIBRARY, word):
+            res.append( re.sub(PAT_LIBRARY, '', word) )
+    return res
+
+def getAllLibFiles(dirs):
+    """
+    Given a list of directories, return all the source files,
+    excluding 'tst_' files
+    """
+    listOfFiles = []
+    for d in dirs:
+        allSrcFiles = glob.glob(d + '/*.c')
+        libFiles = []
+        for f in allSrcFiles:
+            if not re.search(PAT_UNIT_TEST, f):
+                f2 = contractPath(f)
+                libFiles.append(f2)
+        listOfFiles += libFiles
+    return listOfFiles
+
+#
+# Packages and extensions
+#
+source_files = getAllLibFiles(EXTDIRS)
+library_dirs = getLibraryDirs(LIBS)
+libraries = getLibraries(LIBS)
+if @HAVE_UUID@:
+    libraries.append('uuid')
+
+defs = {'HAVE_LAPACK_LIB': @HAVE_LAPACK_LIB@,
+        'HAVE_LAPACK_NO_UNDERSCORE': @HAVE_LAPACK_NO_UNDERSCORE@,
+        'HAVE_LAPACK_UNDERSCORE': @HAVE_LAPACK_UNDERSCORE@}
+define_macros = []
+if defs['HAVE_LAPACK_LIB'] == 1:
+    define_macros.append( ('HAVE_LAPACK_LIB', None) ) #define HAVE_LAPACK_LIB
+define_macros.append( ('HAVE_LAPACK_NO_UNDERSCORE', 
+                       str(defs['HAVE_LAPACK_NO_UNDERSCORE'])) )
+define_macros.append( ('HAVE_LAPACK_UNDERSCORE', 
+                       str(defs['HAVE_LAPACK_UNDERSCORE'])) )
+    
+
+setup(name = "@PACKAGE_NAME@",
+      version = "@VERSION@",
+      description = "A library that supports the creation of CF compliant NetCDF files",
+      author_email = "pletzer@txcorp.com",
+      maintainer_email = "support@unidata.ucar.edu",
+      url = "http://www.unidata.ucar.edu/software/libcf/",
+      packages = ["pycf",],
+      ext_modules=[Extension('pycf.pylibcf', source_files,
+                             include_dirs = incdirs,
+                             library_dirs = library_dirs,
+                             libraries = libraries,
+                             define_macros = define_macros),],
+)
