@@ -52,7 +52,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <mpi.h> header file. */
-#define HAVE_MPI_H 1
+/* #undef HAVE_MPI_H */
 
 /* Define to 1 if you have the <netcdf.h> header file. */
 #define HAVE_NETCDF_H 1
@@ -70,7 +70,7 @@
 #define HAVE_STRING_H 1
 
 /* Define this if you have strlcat() */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if `st_blksize' is a member of `struct stat'. */
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
@@ -141,7 +141,7 @@
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#define SIZEOF_LONG 8
 
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
@@ -179,7 +179,7 @@
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-#define _FILE_OFFSET_BITS 64
+/* #undef _FILE_OFFSET_BITS */
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */
