@@ -7,11 +7,12 @@ export CXXFLAGS="${CXXFLAGS} -fno-common"
 export CFLAGS="${XFLAGS} -fno-common"
 export MACOSX_DEPLOYMENT_TARGET=$(sw_vers -productVersion | sed -E "s/([0-9]+\.[0-9]+).*/\1/")
 export DYLD_FALLBACK_LIBRARY_PATH=${PREFIX}/lib
+export DYLD_LIBRARY_PATH=${PREFIX}/lib
 export LDFLAGS="${LDFLAGS} -lpython" 
 env
 
 pwd
-./configure --prefix=${HOME}/miniconda2
+env DYLD_LIBRARY_PATH=${PREFIX}/lib ./configure --prefix=${HOME}/miniconda2
 make
 make install
 
