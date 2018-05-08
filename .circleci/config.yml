@@ -32,8 +32,12 @@ aliases:
        echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
        echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
        export PREFIX=${HOME}/miniconda
-       export CXXFLAGS="${CXXFLAGS} -fno-common"
-       export CFLAGS="${XFLAGS} -fno-common"
+       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
+       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       export LFLAGS="-fPIC ${LFLAGS}"
+       export FC=""
        # somehow looks for fortran but doesn't seem to need it it's pure C
        # looking for fortran makes mac fail
        source activate base
@@ -43,6 +47,7 @@ aliases:
        ls
        echo "xxx running configure"
        ./configure --prefix=${PREFIX}
+       python setup.py install
        echo "xxx running make"
        make
        echo "xxx running make install"
