@@ -1,0 +1,66 @@
+version: 2
+
+checkout:
+  post:
+    - ./ci-support/checkout_merge_commit.sh
+        
+aliases:
+
+  - &setup_miniconda
+    name: setup_miniconda
+    command: |
+      mkdir -p workspace
+      git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+      ls workspace/cdat
+      python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+      
+  - &create_conda_env
+    name: create_conda_env
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       conda config --set always_yes yes --set changeps1 no
+       conda update -y -q conda
+       conda config --set anaconda_upload no
+       conda install -q  -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc
+
+  - &run_libcf_tests
+    name: run_libcf_tests
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export UVCDAT_ANONYMOUS_LOG=False
+       echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
+       echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
+       echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
+       export PREFIX=${HOME}/miniconda
+       export CXXFLAGS="${CXXFLAGS} -fno-common"
+       export CFLAGS="${XFLAGS} -fno-common"
+       # somehow looks for fortran but doesn't seem to need it it's pure C
+       # looking for fortran makes mac fail
+       export FC="" 
+       env
+       pwd
+       ./configure --prefix=${PREFIX}
+       make
+       make install
+
+
+jobs:
+  macos_libcf:
+    macos:
+      xcode: "9.2.0"
+    environment:
+      WORKDIR: "workspace/test_macos_libcf"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *run_libcf_tests
+
+workflows:
+  version: 2 
+    libcf:
+      jobs:
+        - macos_libcf
+
+
+       
