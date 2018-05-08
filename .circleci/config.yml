@@ -2,7 +2,7 @@ version: 2
 
 checkout:
   post:
-    - ./ci-support/checkout_merge_commit.sh
+    - ./scripts/checkout_merge_commit.sh
         
 aliases:
 
@@ -58,7 +58,7 @@ jobs:
 
 workflows:
   version: 2 
-    libcf:
+  libcf:
       jobs:
         - macos_libcf
 
