@@ -36,6 +36,7 @@ aliases:
        export CFLAGS="${XFLAGS} -fno-common"
        # somehow looks for fortran but doesn't seem to need it it's pure C
        # looking for fortran makes mac fail
+       source activate base
        export FC="" 
        env
        pwd
