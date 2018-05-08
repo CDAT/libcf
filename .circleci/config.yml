@@ -22,12 +22,12 @@ aliases:
        conda update -y -q conda
        conda config --set anaconda_upload no
        conda install -q  -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc
+       conda list
 
   - &run_libcf_tests
     name: run_libcf_tests
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
-       export UVCDAT_ANONYMOUS_LOG=False
        echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
        echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
        echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
@@ -39,8 +39,12 @@ aliases:
        export FC="" 
        env
        pwd
+       ls
+       echo "xxx running configure"
        ./configure --prefix=${PREFIX}
+       echo "xxx running make"
        make
+       echo "xxx running make install"
        make install
 
 
