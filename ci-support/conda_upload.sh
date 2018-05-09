@@ -31,6 +31,7 @@ if [ `uname` == "Linux" ]; then
 else
     sed -i ''  's/last_stable = .*/last_stable="${VERSION}"/g' ./prep_for_build.py
 fi
+export BRANCH=${CIRCLE_BRANCH}
 python ./prep_for_build.py -v ${VERSION} -b ${BRANCH}
 
 conda build $PKG_NAME -c conda-forge -c cdat -c uvcdat --python=27

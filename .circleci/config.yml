@@ -40,7 +40,6 @@ aliases:
        # looking for fortran makes mac fail
        source activate base
        export FC="" 
-       env
        pwd
        ls
        echo "xxx running configure py2"
@@ -67,7 +66,7 @@ aliases:
        make install
        echo "py3 test command exit result:",$RESULT
        export LABEL="unstable"
-       conda-build anaconda-client
+       conda install -n root conda-build anaconda-client 
        bash ./ci-support/conda_upload.sh
        if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
        if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
