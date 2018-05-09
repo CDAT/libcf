@@ -65,6 +65,12 @@ aliases:
        make
        echo "xxx running make install"
        make install
+       echo "py3 test command exit result:",$RESULT
+       export LABEL="unstable"
+       conda-build anaconda-client
+       bash ./ci-support/conda_upload.sh
+       if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
+       if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
 
 
 jobs:
