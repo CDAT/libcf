@@ -31,7 +31,7 @@ aliases:
        echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
        echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
        echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
-       export PREFIX=${CONDA_PREFIX}
+       export PREFIX=$HOME/project/$WORKDIR/miniconda/
        export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
        export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
        export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
