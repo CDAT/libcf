@@ -21,7 +21,9 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda install -q  -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc
+       conda create -q -n py2 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python<3" "numpy>1.14"
+       conda create -q -n py3 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python>3" "numpy>1.14"
+       source activate py2
        conda list
 
   - &run_libcf_tests
@@ -31,11 +33,8 @@ aliases:
        echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
        echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
        echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
-       export PREFIX=$HOME/project/$WORKDIR/miniconda/
        export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
        export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
-       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
-       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
        export LFLAGS="-fPIC ${LFLAGS}"
        # somehow looks for fortran but doesn't seem to need it it's pure C
        # looking for fortran makes mac fail
@@ -44,7 +43,22 @@ aliases:
        env
        pwd
        ls
-       echo "xxx running configure"
+       echo "xxx running configure py2"
+       source activate py2
+       export PREFIX=$CONDA_PREFIX
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       ./configure --prefix=${PREFIX}
+       python setup.py install
+       echo "xxx running make"
+       make
+       echo "xxx running make install"
+       make install
+       echo "xxx running configure py3"
+       source activate py3
+       export PREFIX=$CONDA_PREFIX
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
        ./configure --prefix=${PREFIX}
        python setup.py install
        echo "xxx running make"
@@ -64,6 +78,23 @@ jobs:
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *run_libcf_tests
+
+  linux_vcs:
+    machine:
+      image: circleci/classic:latest
+    environment:
+      WORKDIR: "workspace/test_linux_vcs"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *run_libcf_tests
+      - store_artifacts:
+          path: tests_html
+          destination: tests_html
+      - store_artifacts:
+          path: tests_png
+          destination: tests_png
 
 workflows:
   version: 2 
