@@ -13,7 +13,7 @@ AC_REVISION([$Id: configure.ac 930 2012-07-10 21:13:22Z pletzer $])
 AC_PREREQ([2.59])
 
 ## Initialize with name, version, and support email address. 
-AC_INIT([libcf], [1.0-beta11], [pletzer@txcorp.com])
+AC_INIT([libcf], [1.0-beta12], [pletzer@txcorp.com])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_MSG_NOTICE([libcf AC_PACKAGE_VERSION])

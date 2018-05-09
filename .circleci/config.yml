@@ -17,7 +17,7 @@ aliases:
   - &create_conda_env
     name: create_conda_env
     command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
@@ -31,13 +31,12 @@ aliases:
        echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
        echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
        echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
-       export PREFIX=${HOME}/miniconda
+       export PREFIX=${CONDA_PREFIX}
        export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
        export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
        export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
        export LFLAGS="-fPIC ${LFLAGS}"
-       export FC=""
        # somehow looks for fortran but doesn't seem to need it it's pure C
        # looking for fortran makes mac fail
        source activate base

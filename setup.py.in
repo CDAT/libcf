@@ -47,7 +47,7 @@ def findNetcdfIncludeDir():
 
 netcdfinc = findNetcdfIncludeDir()
 if not netcdfinc:
-    print '*** error: could not find netcdf.h file in CPPFLAGS'
+    print('*** error: could not find netcdf.h file in CPPFLAGS')
     sys.exit(1)
 
 # list all the include directories
