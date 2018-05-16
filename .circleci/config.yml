@@ -13,11 +13,11 @@ aliases:
       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
       ls workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
-      export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
       
   - &create_conda_env
     name: create_conda_env
     command: |
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
@@ -69,6 +69,7 @@ aliases:
   - &upload_libcf
     name: upload_libcf
     command: |
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export LABEL="unstable"
        conda install -n root conda-build anaconda-client 
        bash ./ci-support/conda_upload.sh
