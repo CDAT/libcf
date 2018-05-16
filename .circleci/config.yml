@@ -13,11 +13,11 @@ aliases:
       git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
       ls workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+      export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
       
   - &create_conda_env
     name: create_conda_env
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
