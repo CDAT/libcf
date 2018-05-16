@@ -65,6 +65,10 @@ aliases:
        echo "xxx running make install"
        make install
        echo "py3 test command exit result:",$RESULT
+
+  - &upload_libcf
+    name: upload_libcf
+    command: |
        export LABEL="unstable"
        conda install -n root conda-build anaconda-client 
        bash ./ci-support/conda_upload.sh
@@ -81,8 +85,9 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *run_libcf_tests
+#      - run: *create_conda_env
+#      - run: *run_libcf_tests
+      - run: *upload_libcf
 
   linux_vcs:
     machine:
@@ -94,6 +99,7 @@ jobs:
       - run: *setup_miniconda
       - run: *create_conda_env
       - run: *run_libcf_tests
+      - run: *upload_libcf
       - store_artifacts:
           path: tests_html
           destination: tests_html
