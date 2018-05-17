@@ -75,6 +75,12 @@ aliases:
        bash ./ci-support/conda_upload.sh
        if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
        if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
+       if [ $CIRCLE_BRANCH != "master" ]; then
+           export LABEL="unstable";
+           conda install -n root conda-build anaconda-client;
+           bash ./ci-support/conda_upload.sh;
+       fi
+
 
 
 jobs:
