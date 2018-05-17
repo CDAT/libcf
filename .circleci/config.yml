@@ -92,11 +92,11 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-#      - run: *create_conda_env
-#      - run: *run_libcf_tests
+      - run: *create_conda_env
+      - run: *run_libcf_tests
       - run: *upload_libcf
 
-  linux_vcs:
+  linux_libcf:
     machine:
       image: circleci/classic:latest
     environment:
@@ -119,6 +119,7 @@ workflows:
   libcf:
       jobs:
         - macos_libcf
+        - linux_libcf
 
 
        
