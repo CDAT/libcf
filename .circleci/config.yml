@@ -23,6 +23,14 @@ aliases:
        conda config --set anaconda_upload no
        conda create -q -n py2 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python<3" "numpy>1.14"
        conda create -q -n py3 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python>3" "numpy>1.14"
+       if [ $(uname) == "Linux" ]; then
+           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
+           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
+       else
+           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
+           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
+       fi
+
        source activate py2
        conda list
 
@@ -49,7 +57,11 @@ aliases:
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
        ./configure --prefix=${PREFIX}
        echo "xxx running python install"
-       python setup.py install
+       if [ $(uname) == "Linux" ]; then
+           LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+           python setup.py install
+       fi
        echo "xxx running configure py3"
        source activate py3
        export PREFIX=$CONDA_PREFIX
@@ -57,7 +69,11 @@ aliases:
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
        ./configure --prefix=${PREFIX}
        echo "xxx running python install"
-       python setup.py install
+       if [ $(uname) == "Linux" ]; then
+           LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+           python setup.py install
+       fi
        echo "py3 test command exit result:",$RESULT
 
   - &upload_libcf

@@ -49,6 +49,7 @@ def parseHeader(filename):
         if re.search(r'size\_t', line): continue
         # removing casting
         line = re.sub(r'\(\s*char\s*\)', '', line)
+        line = re.sub(r'\(\s*char\s*\*\)', '', line)
         line = re.sub(r'\(\s*signed\s+char\s*\)', '', line)
         line = re.sub(r'\(\s*short\s*\)', '', line)
         line = re.sub(r'\(\s*long\s+long\s*\)', '', line)
