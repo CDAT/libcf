@@ -52,7 +52,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <mpi.h> header file. */
-#define HAVE_MPI_H 1
+/* #undef HAVE_MPI_H */
 
 /* Define to 1 if you have the <netcdf.h> header file. */
 #define HAVE_NETCDF_H 1
@@ -70,7 +70,7 @@
 #define HAVE_STRING_H 1
 
 /* Define this if you have strlcat() */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if `st_blksize' is a member of `struct stat'. */
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1

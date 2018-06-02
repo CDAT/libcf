@@ -54,6 +54,7 @@ def parseHeader(filename):
         line = re.sub(r'\(\s*short\s*\)', '', line)
         line = re.sub(r'\(\s*long\s+long\s*\)', '', line)
         line = re.sub(r'\(\s*unsigned\s+long\s+long\s*\)', '', line)
+        line = re.sub(r'\s*extern\s*', '', line)
         # remove trailing comment 
         line = re.sub(r'\s*\/\*.*\*?\/?', '', line)
         # remove parentheses around numbers, as in #define NC_EMAXNAME    	(-53)
