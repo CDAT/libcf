@@ -1,0 +1,132 @@
+version: 2
+
+checkout:
+  post:
+    - ./scripts/checkout_merge_commit.sh
+        
+aliases:
+
+  - &setup_miniconda
+    name: setup_miniconda
+    command: |
+      mkdir -p workspace
+      git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+      ls workspace/cdat
+      python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+      
+  - &create_conda_env
+    name: create_conda_env
+    command: |
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       conda config --set always_yes yes --set changeps1 no
+       conda update -y -q conda
+       conda config --set anaconda_upload no
+       conda create -q -n py2 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python<3" "numpy>1.14"
+       conda create -q -n py3 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python>3" "numpy>1.14"
+       if [ $(uname) == "Linux" ]; then
+           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
+           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
+       else
+           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
+           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
+       fi
+
+       source activate py2
+       conda list
+
+  - &run_libcf_tests
+    name: run_libcf_tests
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
+       echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
+       echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
+       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
+       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
+       export LFLAGS="-fPIC ${LFLAGS}"
+       # somehow looks for fortran but doesn't seem to need it it's pure C
+       # looking for fortran makes mac fail
+       source activate base
+       export FC="" 
+       pwd
+       ls
+       echo "xxx running configure py2"
+       source activate py2
+       export PREFIX=$CONDA_PREFIX
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       ./configure --prefix=${PREFIX}
+       echo "xxx running python install"
+       if [ $(uname) == "Linux" ]; then
+           LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+           python setup.py install
+       fi
+       echo "xxx running configure py3"
+       source activate py3
+       export PREFIX=$CONDA_PREFIX
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       ./configure --prefix=${PREFIX}
+       echo "xxx running python install"
+       if [ $(uname) == "Linux" ]; then
+           LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+           python setup.py install
+       fi
+       echo "py3 test command exit result:",$RESULT
+
+  - &upload_libcf
+    name: upload_libcf
+    command: |
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
+       if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
+       if [ $CIRCLE_BRANCH != "master" ]; then
+           export LABEL="unstable";
+           conda install -n root conda-build anaconda-client;
+           bash ./ci-support/conda_upload.sh;
+       fi
+
+
+
+jobs:
+  macos_libcf:
+    macos:
+      xcode: "9.2.0"
+    environment:
+      WORKDIR: "workspace/test_macos_libcf"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *run_libcf_tests
+      - run: *upload_libcf
+
+  linux_libcf:
+    machine:
+      image: circleci/classic:latest
+    environment:
+      WORKDIR: "workspace/test_linux_libcf"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *run_libcf_tests
+      - run: *upload_libcf
+      - store_artifacts:
+          path: tests_html
+          destination: tests_html
+      - store_artifacts:
+          path: tests_png
+          destination: tests_png
+
+workflows:
+  version: 2 
+  libcf:
+      jobs:
+        - macos_libcf
+        - linux_libcf
+
+
+       

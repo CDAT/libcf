@@ -21,10 +21,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-#define FC_FUNC(name,NAME) name ## _
+/* #undef FC_FUNC */
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-#define FC_FUNC_(name,NAME) name ## _
+/* #undef FC_FUNC_ */
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #define HAVE_ALLOCA 1
@@ -120,7 +120,7 @@
 #define PACKAGE_NAME "libcf"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libcf 1.0-beta11"
+#define PACKAGE_STRING "libcf 1.0-beta12"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libcf"
@@ -129,7 +129,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0-beta11"
+#define PACKAGE_VERSION "1.0-beta12"
 
 /* The size of `double', as computed by sizeof. */
 #define SIZEOF_DOUBLE 8
@@ -164,7 +164,7 @@
 /* #undef USE_PARALLEL */
 
 /* Version number of package */
-#define VERSION "1.0-beta11"
+#define VERSION "1.0-beta12"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
