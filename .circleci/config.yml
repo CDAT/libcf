@@ -80,6 +80,7 @@ aliases:
     name: upload_libcf
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       export LABEL="nightly"
        if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
        if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
        if [ $CIRCLE_BRANCH != "master" ]; then
