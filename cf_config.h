@@ -52,7 +52,7 @@
 #define HAVE_MEMORY_H 1
 
 /* Define to 1 if you have the <mpi.h> header file. */
-/* #undef HAVE_MPI_H */
+#define HAVE_MPI_H 1
 
 /* Define to 1 if you have the <netcdf.h> header file. */
 #define HAVE_NETCDF_H 1
@@ -70,7 +70,7 @@
 #define HAVE_STRING_H 1
 
 /* Define this if you have strlcat() */
-#define HAVE_STRLCAT 1
+/* #undef HAVE_STRLCAT */
 
 /* Define to 1 if `st_blksize' is a member of `struct stat'. */
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
@@ -89,7 +89,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Define if uuid is found */
-#define HAVE_UUID_H 1
+/* #undef HAVE_UUID_H */
 
 /* if true, turn on logging */
 /* #undef LOGGING */
@@ -176,6 +176,11 @@
 # ifndef WORDS_BIGENDIAN
 /* #  undef WORDS_BIGENDIAN */
 # endif
+#endif
+
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */

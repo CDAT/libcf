@@ -18225,7 +18225,8 @@ for ac_lib in '' $possible_blas_library_names; do
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib "-lgfortran"
+ $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_dcopy=$ac_res
@@ -18288,7 +18289,8 @@ for ac_lib in '' $possible_blas_library_names; do
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib "-lgfortran"
+	  $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_dcopy_=$ac_res
@@ -18313,13 +18315,11 @@ ac_res=$ac_cv_search_dcopy_
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   have_blas_underscore="yes"
+fi
 
 fi
 
-
-fi
-
-possible_lapack_library_names="sci_quadcore_mp nag essl mkl lapack"
+possible_lapack_library_names="openblas blas sci_quadcore_mp nag essl mkl lapack"
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dgetrf" >&5
 $as_echo_n "checking for library containing dgetrf... " >&6; }
 if ${ac_cv_search_dgetrf+:} false; then :
@@ -18357,7 +18357,8 @@ for ac_lib in '' $possible_lapack_library_names; do
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib "-lgfortran"
+ $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_dgetrf=$ac_res
@@ -18420,7 +18421,8 @@ for ac_lib in '' $possible_lapack_library_names; do
     ac_res="none required"
   else
     ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+    LIBS="-l$ac_lib "-lgfortran"
+       $ac_func_search_save_LIBS"
   fi
   if ac_fn_c_try_link "$LINENO"; then :
   ac_cv_search_dgetrf_=$ac_res
@@ -18445,9 +18447,7 @@ ac_res=$ac_cv_search_dgetrf_
 if test "$ac_res" != no; then :
   test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
   have_lapack_underscore="yes"
-
 fi
-
 
 fi
 
