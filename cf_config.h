@@ -21,10 +21,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-#define FC_FUNC(name,NAME) name ## _
+/* #undef FC_FUNC */
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-#define FC_FUNC_(name,NAME) name ## _
+/* #undef FC_FUNC_ */
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #define HAVE_ALLOCA 1
@@ -89,7 +89,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Define if uuid is found */
-#define HAVE_UUID_H 1
+/* #undef HAVE_UUID_H */
 
 /* if true, turn on logging */
 /* #undef LOGGING */
@@ -120,7 +120,7 @@
 #define PACKAGE_NAME "libcf"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libcf 1.0-beta11"
+#define PACKAGE_STRING "libcf 1.0-beta12"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libcf"
@@ -129,7 +129,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "1.0-beta11"
+#define PACKAGE_VERSION "1.0-beta12"
 
 /* The size of `double', as computed by sizeof. */
 #define SIZEOF_DOUBLE 8
@@ -141,7 +141,7 @@
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 4
+#define SIZEOF_LONG 8
 
 /* The size of `off_t', as computed by sizeof. */
 #define SIZEOF_OFF_T 8
@@ -164,7 +164,7 @@
 /* #undef USE_PARALLEL */
 
 /* Version number of package */
-#define VERSION "1.0-beta11"
+#define VERSION "1.0-beta12"
 
 /* Define WORDS_BIGENDIAN to 1 if your processor stores words with the most
    significant byte first (like Motorola and SPARC, unlike Intel). */
@@ -178,8 +178,13 @@
 # endif
 #endif
 
+/* Enable large inode numbers on Mac OS X 10.5.  */
+#ifndef _DARWIN_USE_64_BIT_INODE
+# define _DARWIN_USE_64_BIT_INODE 1
+#endif
+
 /* Number of bits in a file offset, on hosts where this is settable. */
-#define _FILE_OFFSET_BITS 64
+/* #undef _FILE_OFFSET_BITS */
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */

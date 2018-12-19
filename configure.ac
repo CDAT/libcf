@@ -13,7 +13,7 @@ AC_REVISION([$Id: configure.ac 930 2012-07-10 21:13:22Z pletzer $])
 AC_PREREQ([2.59])
 
 ## Initialize with name, version, and support email address. 
-AC_INIT([libcf], [1.0-beta11], [pletzer@txcorp.com])
+AC_INIT([libcf], [1.0-beta12], [pletzer@txcorp.com])
 AC_CONFIG_MACRO_DIR([m4])
 
 AC_MSG_NOTICE([libcf AC_PACKAGE_VERSION])
@@ -289,15 +289,15 @@ possible_blas_library_names="sci_quadcore_mp nag essl mkl f77blas blas"
 AC_SEARCH_LIBS([dcopy], [$possible_blas_library_names],
    [have_blas="yes"], 
         [AC_SEARCH_LIBS([dcopy_], [$possible_blas_library_names],
-	  [have_blas_underscore="yes"]
-	 )]
+	  [have_blas_underscore="yes"], [], ["-lgfortran"]
+	 )], ["-lgfortran"]
 )
-possible_lapack_library_names="sci_quadcore_mp nag essl mkl lapack"
+possible_lapack_library_names="openblas blas sci_quadcore_mp nag essl mkl lapack"
 AC_SEARCH_LIBS([dgetrf], [$possible_lapack_library_names], 
    [have_lapack="yes"],
       AC_SEARCH_LIBS([dgetrf_], [$possible_lapack_library_names],
-        [have_lapack_underscore="yes"]
-      )
+        [have_lapack_underscore="yes"], [], ["-lgfortran"]
+      ), ["-lgfortran"]
 )
 fi
 AC_SUBST([HAVE_LAPACK_NO_UNDERSCORE], [0])

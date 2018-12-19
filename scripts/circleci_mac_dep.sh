@@ -11,6 +11,6 @@ cmd="export PATH=${HOME}/miniconda/bin:${PATH}"
 echo $cmd
 $cmd
 
-cmd="conda install -q  -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc
+cmd="conda install -q  -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc"
 echo $cmd
 $cmd

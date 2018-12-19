@@ -13,8 +13,8 @@ checkout:
     - ./scripts/checkout_merge_commit.sh
 
 machine:
-#    xcode:
-#        version: 7.2
+    xcode:
+        version: 7.3
     pre:
         - sudo -H pip install --upgrade virtualenv
         - ls
