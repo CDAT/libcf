@@ -2,7 +2,7 @@ version: 2
 
 checkout:
   post:
-    - ./scripts/checkout_merge_commit.sh
+    - ./ci-suppport/checkout_merge_commit.sh
         
 aliases:
 
