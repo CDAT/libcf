@@ -44,11 +44,10 @@ aliases:
        export LFLAGS="-fPIC ${LFLAGS}"
        # somehow looks for fortran but doesn't seem to need it it's pure C
        # looking for fortran makes mac fail
-       source activate py3
        export FC=""
        pwd
        ls
-       echo "xxx running configure py2"
+       echo "xxx running configure $PY_VER"
        export CDAT_ANONYMOUS_LOG=False
        source activate $PY_VER
        export PREFIX=$CONDA_PREFIX
