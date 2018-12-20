@@ -2,7 +2,7 @@ version: 2
 
 checkout:
   post:
-    - ./ci-suppport/checkout_merge_commit.sh
+    - ./ci-support/checkout_merge_commit.sh
         
 aliases:
 
@@ -10,111 +10,82 @@ aliases:
     name: setup_miniconda
     command: |
       mkdir -p workspace
-      git clone -b validateNightly git@github.com:CDAT/cdat workspace/cdat
+      git clone -b validateNightly --depth 1 git@github.com:CDAT/cdat workspace/cdat
       ls workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
       
   - &create_conda_env
     name: create_conda_env
+    environment:
+       CHANNELS: "-c cdat/label/unstable -c cdat/label/nightly -c conda-forge -c cdat"
+       PKGS: ""
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       export PATH=$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       conda create -q -n py2 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python<3" "numpy>1.14"
-       conda create -q -n py3 -c conda-forge hdf5 libnetcdf lapack clapack curl ossuuid gcc "python>3" "numpy>1.14"
-       if [ $(uname) == "Linux" ]; then
-           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
-           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc_linux-64
+       if [[ $PY_VER = 'py2' ]]; then
+          conda create -n $PY_VER -c conda-forge "python<3"
+          conda install -n $PY_VER $CHANNELS $PKGS $CONDA_COMPILER 
        else
-           conda install -n py3 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
-           conda install -n py2 -c cdat/label/unstable -c cdat/label/nightly -c conda-forge gcc
+          conda create -n $PY_VER $CHANNELS $PKGS $CONDA_COMPILER "python>3" coverage coveralls
        fi
 
-       source activate py2
-       conda list
-
-  - &run_libcf_tests
-    name: run_libcf_tests
-    command: |
-       export PATH=$WORKDIR/miniconda/bin:$PATH
-       echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
-       echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
-       echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
-       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
-       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
-       export LFLAGS="-fPIC ${LFLAGS}"
-       # somehow looks for fortran but doesn't seem to need it it's pure C
-       # looking for fortran makes mac fail
-       source activate base
-       export FC="" 
-       pwd
-       ls
-       echo "xxx running configure py2"
-       source activate py2
-       export PREFIX=$CONDA_PREFIX
-       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
-       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       ./configure --prefix=${PREFIX}
-       echo "xxx running python install"
-       if [ $(uname) == "Linux" ]; then
-           LDSHARED="$CC -shared -pthread" python setup.py install
-       else
-           python setup.py install
-       fi
-       echo "xxx running configure py3"
-       source activate py3
-       export PREFIX=$CONDA_PREFIX
-       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
-       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       ./configure --prefix=${PREFIX}
-       echo "xxx running python install"
-       if [ $(uname) == "Linux" ]; then
-           LDSHARED="$CC -shared -pthread" python setup.py install
-       else
-           python setup.py install
-       fi
-       echo "py3 test command exit result:",$RESULT
-
-  - &upload_libcf
+  - &setup_libcf
     name: upload_libcf
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       export LABEL="nightly"
-       if [ $CIRCLE_BRANCH == "master" ]; then conda install -n root conda-build anaconda-client ; fi
-       if [ $CIRCLE_BRANCH == "master" ]; then bash ./ci-support/conda_upload.sh ; fi
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export CDAT_ANONYMOUS_LOG=False
+       source activate $PY_VER
+       if [ $(uname) == "Linux" ];then
+         export LDSHARED="$CC -shared -pthread"
+         LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+         python setup.py install
+       fi
+
+  - &run_libcf_tests
+    name: run_cdms_tests
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export CDAT_ANONYMOUS_LOG=False
+       source activate $PY_VER
+       python -c "import pycf"
+       python -c "import  pycf.libCFConfig:
+       RESULT=$?
+       echo "*** $PY_VER test result: "${RESULT}
+       exit $RESULT
+
+  - &conda_upload
+    name: conda_upload
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export LABEL="nightly";
+       if [ $CIRCLE_BRANCH == "master" ]; then
+          conda install -n root conda-build anaconda-client
+          bash ./ci-support/conda_upload.sh
+       fi
        if [ $CIRCLE_BRANCH != "master" ]; then
            export LABEL="unstable";
+           echo "NOTE: upload LABEL="${LABEL}
            conda install -n root conda-build anaconda-client;
            bash ./ci-support/conda_upload.sh;
        fi
-
-
 
 jobs:
   macos_libcf:
     macos:
       xcode: "9.2.0"
     environment:
-      WORKDIR: "workspace/test_macos_libcf"
+      WORKDIR: "test_macos_libcf"
+      CONDA_COMPILER: "gcc"
     steps:
       - checkout
       - run: *setup_miniconda
       - run: *create_conda_env
+      - run: *setup_libcf
       - run: *run_libcf_tests
-      - run: *upload_libcf
-
-  linux_libcf:
-    machine:
-      image: circleci/classic:latest
-    environment:
-      WORKDIR: "workspace/test_linux_libcf"
-    steps:
-      - checkout
-      - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *run_libcf_tests
-      - run: *upload_libcf
+      - run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -122,12 +93,31 @@ jobs:
           path: tests_png
           destination: tests_png
 
+  linux_libcf:
+    machine:
+      image: circleci/classic:latest
+    environment:
+      WORKDIR: "test_linux_libcf"
+      CONDA_COMPILER: "gcc_linux-64"
+    steps:
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *setup_libcf
+      - run: *run_libcf_tests
+      - run: *conda_upload
+      - store_artifacts:
+          path: tests_html
+          destination: tests_html
+      - store_artifacts:
+          path: tests_png
+          destination: tests_png
+
+
 workflows:
-  version: 2 
-  libcf:
-      jobs:
-        - macos_libcf
-        - linux_libcf
+  version: 2
+  cdms_test:
+    jobs:
+      - macos_libcf
+      - linux_libcf
 
-
-       
