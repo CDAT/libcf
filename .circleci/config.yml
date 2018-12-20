@@ -73,7 +73,7 @@ aliases:
        python -c "import pycf"
        python -c "import  pycf.libCFConfig:
        RESULT=$?
-       echo "*** $py3 test result: "${RESULT}
+       echo "*** $py3 test result: ",${RESULT}
        exit $RESULT
 
   - &conda_upload
