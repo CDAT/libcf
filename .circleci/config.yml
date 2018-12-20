@@ -24,19 +24,16 @@ aliases:
        conda config --set always_yes yes --set changeps1 no
        conda update -y -q conda
        conda config --set anaconda_upload no
-       if [[ $PY_VER = 'py2' ]]; then
-          conda create -n $PY_VER -c conda-forge "python<3"
-          conda install -n $PY_VER $CHANNELS $PKGS $CONDA_COMPILER 
-       else
-          conda create -n $PY_VER $CHANNELS $PKGS $CONDA_COMPILER "python>3" coverage coveralls
-       fi
+       # Libraries don't need to be compile on differenc python versions
+       conda create -n py3 -c conda-forge "python>3"
+       conda install -n py3 $CHANNELS $PKGS $CONDA_COMPILER 
 
   - &setup_libcf
     name: upload_libcf
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
-       source activate $PY_VER
+       source activate py3
        if [ $(uname) == "Linux" ];then
          export LDSHARED="$CC -shared -pthread"
          LDSHARED="$CC -shared -pthread" python setup.py install
@@ -49,11 +46,11 @@ aliases:
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
-       source activate $PY_VER
+       source activate py3
        python -c "import pycf"
        python -c "import  pycf.libCFConfig:
        RESULT=$?
-       echo "*** $PY_VER test result: "${RESULT}
+       echo "*** $py3 test result: "${RESULT}
        exit $RESULT
 
   - &conda_upload
