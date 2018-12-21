@@ -1,13 +1,12 @@
 #!/usr/bin/env bash
 PKG_NAME=libcf
 USER=cdat
-export VERSION="3.0"
+export VERSION="3.1.0"
 echo "Trying to upload to conda"
 echo ""
 echo "Activating base env"
 source activate base
 echo "Making sure conda-build is installed"
-#conda install "conda-build<3.10"
 conda install "conda-build"
 echo "Updating conda"
 conda update -y -q conda
@@ -26,10 +25,15 @@ echo "Cloning recipes"
 git clone git://github.com/CDAT/conda-recipes
 cd conda-recipes
 # uvcdat creates issues for build -c uvcdat confises package and channel
-rm -rf uvcdat
+if [[ -d uvcdat ]]; then
+    rm -rf uvcdat
+fi
+if [[ -d libcf ]]; then
+    rm -rf libcf 
+fi
+ln -s ../recipe libcf
 export BRANCH=${CIRCLE_BRANCH}
 python ./prep_for_build.py  -b ${BRANCH}
 
-conda build $PKG_NAME -c conda-forge -c cdat -c uvcdat --python=27
-conda build $PKG_NAME -c cdat/label/nightly -c conda-forge -c cdat -c uvcdat --python=3.6
+conda build $PKG_NAME -c conda-forge -c cdat --python=3.6
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
