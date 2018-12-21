@@ -34,6 +34,9 @@ fi
 ln -s ../recipe libcf
 export BRANCH=${CIRCLE_BRANCH}
 python ./prep_for_build.py  -b ${BRANCH}
-
-conda build $PKG_NAME -c conda-forge -c cdat --python=3.6
+if [[ $PY_VER = 'py2' ]]; then
+    conda build $PKG_NAME -c conda-forge -c cdat --python=2.7
+else
+    conda build $PKG_NAME -c conda-forge -c cdat --python=3.6
+fi
 anaconda -t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL $CONDA_BLD_PATH/$OS/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
