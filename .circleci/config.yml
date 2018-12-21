@@ -58,7 +58,6 @@ aliases:
        export PREFIX=$CONDA_PREFIX
        export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       export LDSHARED="$CC -shared -pthread"
        ./configure --prefix=${PREFIX}
        make
        make install
