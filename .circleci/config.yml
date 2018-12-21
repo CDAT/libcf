@@ -17,7 +17,7 @@ aliases:
   - &create_conda_env
     name: create_conda_env
     environment:
-       CHANNELS: "-c cdat/label/unstable -c cdat/label/nightly -c conda-forge -c cdat"
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
        PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy"
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
