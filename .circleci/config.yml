@@ -89,13 +89,13 @@ aliases:
        export LABEL="nightly";
        if [ $CIRCLE_BRANCH == "master" ]; then
           conda install -n root conda-build anaconda-client
-          bash ./ci-support/conda_upload.sh
+          bash ./ci-support/conda_upload.sh $PY_VER;
        fi
        if [ $CIRCLE_BRANCH != "master" ]; then
            export LABEL="unstable";
            echo "NOTE: upload LABEL="${LABEL}
            conda install -n root conda-build anaconda-client;
-           bash ./ci-support/conda_upload.sh;
+           bash ./ci-support/conda_upload.sh $PY_VER;
        fi
 jobs:
   macos_libcf_py2:
