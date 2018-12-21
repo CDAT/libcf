@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 PKG_NAME=libcf
 USER=cdat
-echo ".... PY_VER is $PY_VER"
-PY_VER=$1
-echo ".... PY_VER is $PY_VER"
 export VERSION="3.1.0"
 echo "Trying to upload to conda"
 echo ""
