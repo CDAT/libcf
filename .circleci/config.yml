@@ -78,7 +78,7 @@ aliases:
        export CDAT_ANONYMOUS_LOG=False
        source activate $PY_VER
        python -c "import pycf"
-       python -c "import  pycf.libCFConfig:
+       python -c "import  pycf.libCFConfig"
        RESULT=$?
        echo "*** $PY_VER test result: ",${RESULT}
        exit $RESULT
