@@ -70,7 +70,7 @@
 #define HAVE_STRING_H 1
 
 /* Define this if you have strlcat() */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if `st_blksize' is a member of `struct stat'. */
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
@@ -89,7 +89,7 @@
 #define HAVE_UNISTD_H 1
 
 /* Define if uuid is found */
-/* #undef HAVE_UUID_H */
+#define HAVE_UUID_H 1
 
 /* if true, turn on logging */
 /* #undef LOGGING */
