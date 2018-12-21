@@ -189,11 +189,11 @@ workflows:
   version: 2
   libcf_test:
     jobs:
-      - macos_libcf_py2
+#      - macos_libcf_py2
       - macos_libcf_py3:
            requires:
               - macos_libcf_py2
-      - linux_libcf_py2
+#      - linux_libcf_py2
       - linux_libcf_py3:
            requires:
               - linux_libcf_py2
