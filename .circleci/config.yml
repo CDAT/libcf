@@ -18,7 +18,7 @@ aliases:
     name: create_conda_env
     environment:
        CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
-       PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy"
+       PKGS: "hdf5 libnetcdf lapack clapack curl libuuid numpy"
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
@@ -35,7 +35,7 @@ aliases:
        fi
 
   - &setup_libcf
-    name: upload_libcf
+    name: setup_libcf
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
