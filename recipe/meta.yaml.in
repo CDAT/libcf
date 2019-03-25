@@ -30,7 +30,7 @@ requirements:
     - blas 1.1 {{ variant }}
     - curl >=7.44.0,<8
     - python
-    - ossuuid
+    - libuuid
 
 test:
   imports:
@@ -54,6 +54,7 @@ extra:
   recipe-maintainers:
     - dnadeau4
     - doutriaux1
+    - xylar
 
 
 
