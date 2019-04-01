@@ -20,6 +20,8 @@ requirements:
     - {{ compiler('c') }}
   host:
     - libnetcdf 
+    - libblas
+    - libcblas
     - curl >=7.44.0,<8
     - python
     - ossuuid 
