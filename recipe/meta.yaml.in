@@ -24,12 +24,12 @@ requirements:
     - libcblas
     - curl >=7.44.0,<8
     - python
-    - ossuuid 
+    - libuuid 
   run:
     - libnetcdf 
     - curl >=7.44.0,<8
     - python
-    - ossuuid
+    - libuuid
 
 test:
   imports:
