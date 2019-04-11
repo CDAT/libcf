@@ -24,7 +24,7 @@ requirements:
     - libcblas
     - curl >=7.44.0,<8
     - python
-    - libuuid 
+    - libuuid
   run:
     - libnetcdf 
     - curl >=7.44.0,<8
