@@ -19,14 +19,14 @@ requirements:
   build:
     - {{ compiler('c') }}
   host:
-    - libnetcdf 
+    - libnetcdf <4.7
     - libblas
     - libcblas
     - curl >=7.44.0,<8
     - python
     - libuuid
   run:
-    - libnetcdf 
+    - libnetcdf <4.7
     - curl >=7.44.0,<8
     - python
     - libuuid
