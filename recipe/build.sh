@@ -1,10 +1,15 @@
-#source activate "${CONDA_DEFAULT_ENV}"
-export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
+export CFLAGS="-Wall -m64 -pipe -O2  -fPIC -I${PREFIX}/include ${CFLAGS}"
 export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
 export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
 export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
 export LFLAGS="-fPIC ${LFLAGS}"
 export FC=""
+# needed for clang_osx-64
+if [ ${HOME} == "/Users/distiller" ]; then
+    export CFLAGS="-Wl,-syslibroot / -isysroot / ${CFLAGS}"
+    # configure need this otherwise "error.h" is not found and configure report netcdf.h 
+    export CPPFLAGS="-Wl,-syslibroot / -isysroot / -I${PREFIX}/include ${CPPFLAGS}"
+fi
 ./configure --prefix=${PREFIX}
 make
 make install
