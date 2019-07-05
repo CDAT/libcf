@@ -12,5 +12,8 @@ if [ $(uname) == "Linux" ];then
     export LDSHARED="$CC -shared -pthread"
     LDSHARED="$CC -shared -pthread" python setup.py install
 else
+    if [${HOME} == "/Users/distiller"]; then
+        export  CFLAGS="-Wl,-syslibroot / -isysroot / $(CFLAGS)"
+    fi
     python setup.py install
 fi

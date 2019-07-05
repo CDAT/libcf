@@ -21,10 +21,10 @@
 
 /* Define to a macro mangling the given C identifier (in lower and upper
    case), which must not contain underscores, for linking with Fortran. */
-/* #undef FC_FUNC */
+#define FC_FUNC(name,NAME) name ## _
 
 /* As FC_FUNC, but for C identifiers containing underscores. */
-/* #undef FC_FUNC_ */
+#define FC_FUNC_(name,NAME) name ## _
 
 /* Define to 1 if you have `alloca', as a function or macro. */
 #define HAVE_ALLOCA 1
@@ -70,7 +70,7 @@
 #define HAVE_STRING_H 1
 
 /* Define this if you have strlcat() */
-/* #undef HAVE_STRLCAT */
+#define HAVE_STRLCAT 1
 
 /* Define to 1 if `st_blksize' is a member of `struct stat'. */
 #define HAVE_STRUCT_STAT_ST_BLKSIZE 1
