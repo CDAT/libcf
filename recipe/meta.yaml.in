@@ -7,31 +7,32 @@ package:
 
 source:
     git_rev: @UVCDAT_BRANCH@
-    git_url: git://github.com/cdat/libcf.git
+    git_url: https://github.com/cdat/libcf.git
 
 #    url: http://uvcdat.llnl.gov/cdat/resources/{{ name }}-1.0.1-beta12.tar.gz
 #    sha256: de3f16c515198eba596f5e52fc69ce7fd18230c043711ff4c1934d76dbbc8259
 
 build:
   number: @BUILD_NUMBER@
+  skip: True # [win]
  
 requirements:
   build:
     - {{ compiler('c') }}
   host:
-    - libnetcdf <4.7
-    - libblas
-    - libcblas
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
+    - curl >=7.44.0,<8
     - libuuid
   run:
-    - libnetcdf <4.7
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf
+    - curl >=7.44.0,<8
     - libuuid
-    - libblas
-    - libcblas
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
 
 test:
   imports:
@@ -55,6 +56,6 @@ extra:
   recipe-maintainers:
     - dnadeau4
     - doutriaux1
-
-
-
+    - muryanto1
+    - downiec
+    - jasonb5
