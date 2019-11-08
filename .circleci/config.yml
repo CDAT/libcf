@@ -1,24 +1,120 @@
-# This file was generated automatically from conda-smithy. To update this configuration,
-# update the conda-forge.yml and/or the recipe/meta.yaml.
-# -*- mode: yaml -*-
-
 version: 2
 
+aliases:
+
+  - &setup_miniconda
+    name: setup_miniconda
+    command: |
+      mkdir -p $WORKDIR
+      git clone -b validateNightly --depth 1 git@github.com:CDAT/cdat $WORKDIR/cdat
+      python $WORKDIR/cdat/scripts/install_miniconda.py -w $WORKDIR -p $PY_VER
+
+  - &create_conda_env
+    name: create_conda_env
+    environment:
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
+       #PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy future distarray"
+       PKGS: "libnetcdf libblas libcblas curl libuuid"
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       conda config --set always_yes yes --set changeps1 no
+       conda update -y -q conda
+       conda config --set anaconda_upload no
+       if [[ $PY_VER = 'py2' ]]; then
+          conda create -n $PY_VER -c conda-forge "python<3" 
+       else
+          conda create -n $PY_VER -c conda-forge "python>3" 
+       fi
+       conda install -n $PY_VER $CHANNELS $PKGS 
+       conda install -n $PY_VER $CONDA_COMPILER
+
+  - &setup_libcf
+    name: upload_libcf
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export CDAT_ANONYMOUS_LOG=False
+       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC -I${PREFIX}/include ${CFLAGS}"
+       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
+       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
+       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       export LFLAGS="-fPIC ${LFLAGS}"
+       export FC=""
+       ./configure --prefix=${PREFIX}
+       make
+       make install
+       echo "xxx running python install"
+       if [ $(uname) == "Linux" ]; then
+           LDSHARED="$CC -shared -pthread" python setup.py install
+       else
+           python setup.py install
+       fi
+       conda list
+
+  - &run_libcf_tests
+    name: run_libcf_tests
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export CDAT_ANONYMOUS_LOG=False
+       source activate $PY_VER
+       python -c "import pycf"
+       python -c "import  pycf.libCFConfig"
+       RESULT=$?
+       echo "*** $PY_VER test result: ${RESULT}"
+       exit $RESULT
+
+  - &conda_build_upload
+    name: conda_build_upload
+    command: |
+       export PATH=$WORKDIR/miniconda/bin:$PATH
+       export LABEL="nightly";
+       export VERSION="1.0.3"
+       # REVISIT
+       cwd=`pwd`
+       echo "xxx cwd: $cwd"
+       git status
+       git clone -b sync_recipe https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes
+       CONDA_RECIPES_REPO=$cwd/$WORKDIR/conda-recipes
+       echo "CONDA_RECIPES_REPO: $CONDA_RECIPES_REPO"
+       python $CONDA_RECIPES_REPO/prepare_for_recipe.py -l $VERSION
+       cat recipe/meta.yaml
+       bash $CONDA_RECIPES_REPO/conda_build_upload.sh $cwd/$WORKDIR
+
 jobs:
-  build:
-    working_directory: ~/test
-    machine: true
+  macos_libcf_py3:
+    macos:
+      xcode: "11.1.0"
+    environment:
+      WORKDIR: "test_macos_libcf_py3"
+      PY_VER: "py3"
+      CONDA_COMPILER: "clang_osx-64"
     steps:
-      - run:
-          # The Circle-CI build should not be active, but if this is not true for some reason, do a fast finish.
-          command: exit 0
+      - checkout
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *setup_libcf
+      - run: *run_libcf_tests
+      - run: *conda_build_upload
+
+  linux_libcf_py3:
+    machine:
+      image: circleci/classic
+    environment:
+      WORKDIR: "test_linux_libcf_py3"
+      PY_VER: "py3"
+      CONDA_COMPILER: "gcc_linux-64"
+    steps:
+      - checkout
+      - run: pwd
+      - run: ls -l
+      - run: *setup_miniconda
+      - run: *create_conda_env
+      - run: *setup_libcf
+      - run: *run_libcf_tests
+      - run: *conda_build_upload
 
 workflows:
   version: 2
-  build_and_test:
+  libcf:
     jobs:
-      - build:
-          filters:
-            branches:
-              ignore:
-                - /.*/
+      - macos_libcf_py3
+      - linux_libcf_py3
