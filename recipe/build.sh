@@ -4,6 +4,8 @@ export CPPFLAGS="-I${PREFIX}/include -I/usr/local/netcdf/include ${CPPFLAGS}"
 export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
 export LFLAGS="-fPIC ${LFLAGS}"
 export FC=""
+
+echo "CPPFLAGS: $CPPFLAGS"
 # needed for clang_osx-64
 if [ ${HOME} == "/Users/distiller" ]; then
     export CFLAGS="-Wl,-syslibroot / -isysroot / ${CFLAGS}"
