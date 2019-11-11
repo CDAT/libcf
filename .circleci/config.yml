@@ -13,8 +13,8 @@ aliases:
     name: create_conda_env
     environment:
        CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
-       PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy future distarray"
-       #PKGS: "libnetcdf libblas libcblas curl libuuid"
+       #PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy future distarray"
+       PKGS: "libnetcdf libblas libcblas curl libuuid"
     command: |
        export PATH=$WORKDIR/miniconda/bin:$PATH
        conda config --set always_yes yes --set changeps1 no
@@ -34,21 +34,7 @@ aliases:
        export PATH=$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
        source activate $PY_VER
-       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC -I${PREFIX}/include ${CFLAGS}"
-       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
-       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
-       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       export LFLAGS="-fPIC ${LFLAGS}"
-       export FC=""
-       ./configure --prefix=${PREFIX}
-       make
-       make install
-       echo "xxx running python install"
-       if [ $(uname) == "Linux" ]; then
-           LDSHARED="$CC -shared -pthread" python setup.py install
-       else
-           python setup.py install
-       fi
+       bash recipe/build.sh
        conda list
 
   - &run_libcf_tests
