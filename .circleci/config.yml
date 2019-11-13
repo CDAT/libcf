@@ -100,7 +100,7 @@ aliases:
 jobs:
   macos_libcf_py2:
     macos:
-      xcode: "9.2.0"
+      xcode: "11.2.0"
     environment:
       WORKDIR: "test_macos_libcf_py2"
       PY_VER: "py2"
@@ -111,7 +111,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_libcf
       - run: *run_libcf_tests
-      - run: *conda_upload
+      #- run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -121,7 +121,7 @@ jobs:
 
   macos_libcf_py3:
     macos:
-      xcode: "9.2.0"
+      xcode: "11.2.0"
     environment:
       WORKDIR: "test_macos_libcf_py3"
       PY_VER: "py3"
@@ -132,7 +132,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_libcf
       - run: *run_libcf_tests
-      - run: *conda_upload
+      #- run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -153,7 +153,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_libcf
       - run: *run_libcf_tests
-      - run: *conda_upload
+      #- run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
@@ -177,7 +177,7 @@ jobs:
       - run: *create_conda_env
       - run: *setup_libcf
       - run: *run_libcf_tests
-      - run: *conda_upload
+      #- run: *conda_upload
       - store_artifacts:
           path: tests_html
           destination: tests_html
