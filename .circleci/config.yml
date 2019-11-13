@@ -34,8 +34,8 @@ aliases:
           conda install -n $PY_VER $CONDA_COMPILER
        fi
 
-  - &setup_libcf1
-    name: setup_libcf1
+  - &setup_libcf
+    name: setup_libcf
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
@@ -58,6 +58,7 @@ aliases:
        export PREFIX=$CONDA_PREFIX
        export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
+       echo "XXX XXX ./configure --prefix=${PREFIX}"
        ./configure --prefix=${PREFIX}
        make
        make install
@@ -69,8 +70,8 @@ aliases:
        fi
        echo "$PY_VER test command exit result:",$RESULT
 
-  - &setup_libcf
-    name: setup_libcf
+  - &setup_libcf1
+    name: setup_libcf1
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False

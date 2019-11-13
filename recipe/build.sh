@@ -1,3 +1,4 @@
+#!/bin/sh
 export CFLAGS="-Wall -m64 -pipe -O2  -fPIC -I${PREFIX}/include ${CFLAGS}"
 export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
 export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
@@ -10,6 +11,8 @@ if [ ${HOME} == "/Users/distiller" ]; then
     # configure need this otherwise "error.h" is not found and configure report netcdf.h 
     export CPPFLAGS="-Wl,-syslibroot / -isysroot / -I${PREFIX}/include ${CPPFLAGS}"
 fi
+echo "XXX XXX"
+ls
 ./configure --prefix=${PREFIX}
 make
 make install
