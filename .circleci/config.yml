@@ -76,7 +76,8 @@ aliases:
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
        source activate $PY_VER
-       bash ./recipe/build.sh
+       export PREFIX=$CONDA_PREFIX
+       bash -e ./recipe/build.sh
 
   - &run_libcf_tests
     name: run_libcf_tests
