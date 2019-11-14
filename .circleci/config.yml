@@ -34,8 +34,8 @@ aliases:
           conda install -n $PY_VER $CONDA_COMPILER
        fi
 
-  - &setup_libcf1
-    name: setup_libcf1
+  - &setup_libcf
+    name: setup_libcf
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
@@ -70,8 +70,8 @@ aliases:
        fi
        echo "$PY_VER test command exit result:",$RESULT
 
-  - &setup_libcf
-    name: setup_libcf
+  - &setup_libcf1
+    name: setup_libcf1
     command: |
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
        export CDAT_ANONYMOUS_LOG=False
@@ -109,7 +109,7 @@ aliases:
 jobs:
   macos_libcf_py2:
     macos:
-      xcode: "11.2.0"
+      xcode: "11.1.0"
     environment:
       WORKDIR: "test_macos_libcf_py2"
       PY_VER: "py2"
@@ -130,7 +130,7 @@ jobs:
 
   macos_libcf_py3:
     macos:
-      xcode: "11.2.0"
+      xcode: "11.1.0"
     environment:
       WORKDIR: "test_macos_libcf_py3"
       PY_VER: "py3"
