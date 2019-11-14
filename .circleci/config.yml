@@ -58,7 +58,7 @@ aliases:
        export PREFIX=$CONDA_PREFIX
        export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
        export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       echo "XXX XXX ./configure --prefix=${PREFIX}"
+       echo "XXXXXX XXX ./configure --prefix=${PREFIX}"
        ./configure --prefix=${PREFIX}
        make
        make install
@@ -136,7 +136,7 @@ aliases:
 jobs:
   macos_libcf_py2:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.0"
     environment:
       WORKDIR: "test_macos_libcf_py2"
       PY_VER: "py2"
@@ -157,7 +157,7 @@ jobs:
 
   macos_libcf_py3:
     macos:
-      xcode: "11.1.0"
+      xcode: "11.2.0"
     environment:
       WORKDIR: "test_macos_libcf_py3"
       PY_VER: "py3"
