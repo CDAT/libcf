@@ -13,6 +13,7 @@ if [ ${HOME} == "/Users/distiller" ]; then
 fi
 echo "XXX XXX"
 ls
+echo "./configure --prefix=${PREFIX}"
 ./configure --prefix=${PREFIX}
 make
 make install
