@@ -115,7 +115,8 @@ aliases:
        #if [[ $CIRCLE_BRANCH != 'master' ]]; then
        #   exit 0
        #fi
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       # HERE HERE HERE
+       export PATH=$PATH:$HOME/project/$WORKDIR/miniconda/bin
        source activate $PY_VER
        export VERSION="1.0.3"
        export LABEL="linatest";
@@ -144,7 +145,7 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *create_conda_env
+      #- run: *create_conda_env
       - run: *setup_libcf
       - run: *run_libcf_tests
       #- run: *conda_upload
@@ -165,7 +166,7 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: *create_conda_env
+      #- run: *create_conda_env
       #- run: *setup_libcf
       #- run: *run_libcf_tests
       #- run: *conda_upload
@@ -211,7 +212,7 @@ jobs:
       - run: pwd
       - run: ls -l
       - run: *setup_miniconda
-      - run: *create_conda_env
+      #- run: *create_conda_env
       #- run: *setup_libcf
       #- run: *run_libcf_tests
       #- run: *conda_upload
