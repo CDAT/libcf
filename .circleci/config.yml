@@ -116,7 +116,7 @@ aliases:
        #   exit 0
        #fi
        export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       source activate $PY_VER
+       #source activate $PY_VER
        export VERSION="1.0.3"
        export LABEL="linatest";
        export PKG_NAME="libcf";
