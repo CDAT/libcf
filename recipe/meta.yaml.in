@@ -19,19 +19,19 @@ requirements:
   build:
     - {{ compiler('c') }}
   host:
-    - libnetcdf <4.7
-    - libblas
-    - libcblas
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
+    - curl >=7.44.0,<8
     - libuuid
   run:
-    - libnetcdf <4.7
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf
+    - curl >=7.44.0,<8
     - libuuid
-    - libblas
-    - libcblas
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
 
 test:
   imports:
