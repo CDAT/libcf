@@ -166,7 +166,6 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
-      - run: xcode-select --install
       #- run: *create_conda_env
       #- run: *setup_libcf
       #- run: *run_libcf_tests
