@@ -158,7 +158,7 @@ jobs:
 
   macos_libcf_py3:
     macos:
-      xcode: "10.1.0"
+      xcode: "9.4.1"
     environment:
       WORKDIR: "test_macos_libcf_py3"
       PY_VER: "py3"
