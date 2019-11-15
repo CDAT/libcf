@@ -10,9 +10,9 @@ gcc --version
 if [ ${HOME} == "/Users/distiller" ]; then
     echo "xxx xxx xxx gcc --version"
     gcc --version
-    export CFLAGS="-Wl,-syslibroot / -isysroot / ${CFLAGS}"
+    export CFLAGS="-Wl,-syslibroot -isysroot ${CFLAGS}"
     # configure need this otherwise "error.h" is not found and configure report netcdf.h 
-    export CPPFLAGS="-Wl,-syslibroot / -isysroot / -I${PREFIX}/include ${CPPFLAGS}"
+    export CPPFLAGS="-Wl,-syslibroot -isysroot -I${PREFIX}/include ${CPPFLAGS}"
 fi
 ./configure --prefix=${PREFIX}
 make
