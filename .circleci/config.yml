@@ -169,8 +169,9 @@ jobs:
 
   macos_libcf_py3:
     macos:
-      xcode: "9.4.1"
-      # xcode: "11.2.1"
+      # works with entries in build.sh commented out for /users/distiller
+      # xcode: "9.4.1"
+      xcode: "11.2.1"
       #xcode: "9.3.1"
     environment:
       WORKDIR: "test_macos_libcf_py3"
