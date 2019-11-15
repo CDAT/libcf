@@ -14,6 +14,17 @@ aliases:
       ls workspace/cdat
       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p $PY_VER
       
+  - &install_compiler
+    name: install_compiler
+    environment:
+       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
+    command: |
+       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
+       conda config --set always_yes yes --set changeps1 no
+       conda update -y -q conda
+       conda config --set anaconda_upload no
+       conda install -n base $CONDA_COMPILER
+
   - &create_conda_env
     name: create_conda_env
     environment:
@@ -166,6 +177,7 @@ jobs:
     steps:
       - checkout
       - run: *setup_miniconda
+      - run: *install_compiler
       #- run: *create_conda_env
       #- run: *setup_libcf
       #- run: *run_libcf_tests
@@ -233,7 +245,7 @@ workflows:
       #     requires:
       #        - macos_libcf_py2
       #- linux_libcf_py2
-      - linux_libcf_py3
+      #- linux_libcf_py3
       #     requires:
       #        - linux_libcf_py2
 
