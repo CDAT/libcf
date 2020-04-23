@@ -1,5 +1,14 @@
 {% set name = "libcf" %}
-{% set variant = "openblas" %}
+{% set version = "1.0.3" %}
+{% set build = 7 %}
+
+# ensure mpi is defined (needed for conda-smithy recipe-lint)
+{% set mpi = mpi or 'nompi' %}
+
+{% if mpi == 'nompi' %}
+# prioritize nompi variant
+{% set build = build + 100 %}
+{% endif %}
 
 package:
     name: libcf
@@ -9,29 +18,44 @@ source:
     git_rev: @UVCDAT_BRANCH@
     git_url: git://github.com/cdat/libcf.git
 
-#    url: http://uvcdat.llnl.gov/cdat/resources/{{ name }}-1.0.1-beta12.tar.gz
-#    sha256: de3f16c515198eba596f5e52fc69ce7fd18230c043711ff4c1934d76dbbc8259
-
 build:
   number: @BUILD_NUMBER@
  
+  skip: True  # [win]
+
+  # add build string so packages can depend on
+  # mpi or nompi variants explicitly:
+  # `libcf * mpi_mpich_*` for mpich
+  # `libcf * mpi_*` for any mpi
+  # `libcf * nompi_*` for no mpi
+
+  {% if mpi != 'nompi' %}
+  {% set mpi_prefix = "mpi_" + mpi %}
+  {% else %}
+  {% set mpi_prefix = "nompi" %}
+  {% endif %}
+  string: "{{ mpi_prefix }}_h{{ PKG_HASH }}_{{ build }}"
+
 requirements:
   build:
     - {{ compiler('c') }}
+
   host:
-    - libnetcdf <4.7
-    - libblas
-    - libcblas
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf
+    - libnetcdf * {{ mpi_prefix }}_*
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
+    - curl >=7.44.0,<8
     - libuuid
+
   run:
-    - libnetcdf <4.7
-    - curl >=7.44.0,<8
     - python
+    - libnetcdf * {{ mpi_prefix }}_*
+    - curl >=7.44.0,<8
     - libuuid
-    - libblas
-    - libcblas
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
 
 test:
   imports:
@@ -55,6 +79,10 @@ extra:
   recipe-maintainers:
     - dnadeau4
     - doutriaux1
+    - xylar
+    - downiec
+    - muryanto1
+    - jasonb5
 
 
 
