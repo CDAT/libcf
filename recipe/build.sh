@@ -10,6 +10,7 @@ set -x
 
 # needed for clang_osx-64
 if [ ${HOME} == "/Users/distiller" ]; then
+    export PATH=/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/Users/distiller/project/macos_build/miniconda/bin:/Users/distiller/project/macos_build/miniconda/condabin:$PATH
     export CFLAGS="-Wl,-syslibroot / -isysroot / ${CFLAGS}"
     # configure need this otherwise "error.h" is not found and configure report netcdf.h 
     export CPPFLAGS="-Wl,-syslibroot / -isysroot / -I${PREFIX}/include ${CPPFLAGS}"
