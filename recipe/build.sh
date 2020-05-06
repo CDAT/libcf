@@ -4,6 +4,7 @@ export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
 export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
 export LFLAGS="-fPIC ${LFLAGS}"
 export FC=""
+
 # needed for clang_osx-64
 if [ ${HOME} == "/Users/distiller" ]; then
     export CFLAGS="-Wl,-syslibroot / -isysroot / ${CFLAGS}"
@@ -13,9 +14,9 @@ fi
 ./configure --prefix=${PREFIX}
 make
 make install
-if [ $(uname) == "Linux" ];then
-    export LDSHARED="$CC -shared -pthread"
-    LDSHARED="$CC -shared -pthread" python setup.py install
+if [ `uname` == Linux ]; then
+    LDSHARED="$CC -shared -pthread"  ${PYTHON} setup.py install;
 else
-    python setup.py install
+    # LDSHARED_FLAGS="-bundle -undefined dynamic_lookup"  ${PYTHON} setup.py install;
+    ${PYTHON} setup.py install;
 fi

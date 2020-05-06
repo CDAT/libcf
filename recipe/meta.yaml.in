@@ -1,5 +1,4 @@
 {% set name = "libcf" %}
-{% set variant = "openblas" %}
 
 package:
     name: libcf
@@ -14,24 +13,18 @@ source:
 
 build:
   number: @BUILD_NUMBER@
+  skip: True  # [win]
  
 requirements:
   build:
     - {{ compiler('c') }}
   host:
-    - libnetcdf <4.7
-    - libblas
-    - libcblas
-    - curl >=7.44.0,<8
     - python
-    - libuuid
-  run:
-    - libnetcdf <4.7
+    - libnetcdf
+    - libblas 3.8.0 *openblas
+    - libcblas 3.8.0 *openblas
     - curl >=7.44.0,<8
-    - python
     - libuuid
-    - libblas
-    - libcblas
 
 test:
   imports:

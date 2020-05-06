@@ -1,200 +1,284 @@
 version: 2
 
-checkout:
-  post:
-    - ./ci-support/checkout_merge_commit.sh
-        
 aliases:
-
   - &setup_miniconda
     name: setup_miniconda
     command: |
-      mkdir -p workspace
-      git clone -b validateNightly --depth 1 git@github.com:CDAT/cdat workspace/cdat
-      ls workspace/cdat
-      python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p $PY_VER
-      
-  - &create_conda_env
-    name: create_conda_env
+       mkdir -p workspace
+       git clone -b validateNightlyNew git@github.com:CDAT/cdat workspace/cdat
+       # install_miniconda.py installs miniconda3 under $WORKDIR/miniconda
+       python workspace/cdat/scripts/install_miniconda.py -w $WORKDIR -p 'py3'
+
+  - &conda_rerender
+    name: conda_rerender
+    command: |
+       git clone -b feedstock_recipe https://github.com/CDAT/conda-recipes.git $WORKDIR/conda-recipes 
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate base
+       BUILD_SCRIPT="$WORKDIR/conda-recipes/build_tools/conda_build.py"
+       python $BUILD_SCRIPT -w $WORKDIR -l $LAST_STABLE -B 0 -p $PKG_NAME -r $REPO_NAME -b $CIRCLE_BRANCH --do_rerender
+
+  - &conda_build
+    name: conda_build
+    command: |
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate base
+       python --version
+       conda config --add channels conda-forge --force
+       conda config --add channels cdat/label/nightly --force
+       conda config --set channel_priority strict
+       BUILD_SCRIPT="$WORKDIR/conda-recipes/build_tools/conda_build.py"
+       python $BUILD_SCRIPT -w $WORKDIR -p $PKG_NAME -r $REPO_NAME --build_version $BUILD_VARIANT_VER --do_build
+
+  - &setup_run_tests
+    name: setup_run_tests
     environment:
-       CHANNELS: "-c cdat/label/nightly -c conda-forge -c cdat"
-       PKGS: "hdf5 libnetcdf lapack clapack curl ossuuid numpy future distarray"
+       PKGS: "testsrunner pytest"
+       CHANNELS: "-c cdat/label/nightly -c conda-forge"
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       conda config --set always_yes yes --set changeps1 no
-       conda update -y -q conda
-       conda config --set anaconda_upload no
-       if [[ $PY_VER = 'py2' ]]; then
-          conda create -n $PY_VER -c conda-forge "python<3" 
-          conda install -n $PY_VER $CHANNELS $PKGS 
-          conda install -n $PY_VER $CONDA_COMPILER
-       else
-          conda create -n $PY_VER -c conda-forge "python>3" 
-          conda install -n $PY_VER $CHANNELS $PKGS 
-          conda install -n $PY_VER $CONDA_COMPILER
-       fi
-
-  - &setup_libcf
-    name: upload_libcf
-    command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       export CDAT_ANONYMOUS_LOG=False
-       echo "CIRCLE CI BRANCH: "$CIRCLE_BRANCH
-       echo "CI_PULL_REQUESTS: "$CI_PULL_REQUESTS
-       echo "CI_PULL_REQUEST: "$CI_PULL_REQUEST
-       export CFLAGS="-Wall -m64 -pipe -O2  -fPIC ${CFLAGS}"
-       export CXXFLAGS="${CFLAGS} ${CXXFLAGS}"
-       export LFLAGS="-fPIC ${LFLAGS}"
-       # somehow looks for fortran but doesn't seem to need it it's pure C
-       # looking for fortran makes mac fail
-       export FC=""
-       pwd
-       ls
-       echo "xxx running configure $PY_VER"
-       export CDAT_ANONYMOUS_LOG=False
-       . $HOME/project/$WORKDIR/miniconda/etc/profile.d/conda.sh
-       conda activate $PY_VER
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate base
+       conda create -y -n test_libcf --use-local $CHANNELS "$CONDA_PY_VER" $PKG_NAME $PKGS $COVERAGE_PKGS
+       conda activate test_libcf
        conda list
-       export PREFIX=$CONDA_PREFIX
-       export CPPFLAGS="-I${PREFIX}/include ${CPPFLAGS}"
-       export LDFLAGS="-L${PREFIX}/lib ${LDFLAGS}"
-       ./configure --prefix=${PREFIX}
-       make
-       make install
-       echo "xxx running python install"
-       if [ $(uname) == "Linux" ]; then
-           LDSHARED="$CC -shared -pthread" python setup.py install
-       else
-           python setup.py install
-       fi
-       echo "$PY_VER test command exit result:",$RESULT
+       conda list --verbose libcf
 
-
-  - &run_libcf_tests
-    name: run_libcf_tests
+  - &run_tests
+    name: run_tests
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       export CDAT_ANONYMOUS_LOG=False
-       source activate $PY_VER
-       python -c "import pycf"
-       python -c "import  pycf.libCFConfig"
-       RESULT=$?
-       echo "*** $PY_VER test result: ",${RESULT}
-       exit $RESULT
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate test_libcf
+       python run_tests.py -H -v2 -n 1 `pwd`/tests/test_big_array.py
+       mv tests/test_big_array.py $WORKDIR/
+       python run_tests.py -H -v2 --subdir $COVERAGE
+    no_output_timeout: 60m
 
   - &conda_upload
     name: conda_upload
     command: |
-       export PATH=$HOME/project/$WORKDIR/miniconda/bin:$PATH
-       export LABEL="nightly";
-       if [ $CIRCLE_BRANCH == "master" ]; then
-          conda install -n root conda-build anaconda-client conda-verify
-          bash ./ci-support/conda_upload.sh;
-       fi
-       if [ $CIRCLE_BRANCH != "master" ]; then
-           export LABEL="unstable";
-           echo "NOTE: upload LABEL="${LABEL}
-           conda install -n root conda-build anaconda-client conda-verify;
-           bash ./ci-support/conda_upload.sh;
-       fi
+       #if [[ $CIRCLE_BRANCH != "master" ]]; then
+       #   exit 0
+       #fi
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate base
+       UPLOAD_OPTIONS="-t $CONDA_UPLOAD_TOKEN upload -u $USER -l $LABEL"
+       anaconda $UPLOAD_OPTIONS linux_build/miniconda/conda-bld/linux-64/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
+       anaconda $UPLOAD_OPTIONS macos_build/miniconda/conda-bld/osx-64/$PKG_NAME-$VERSION.`date +%Y*`0.tar.bz2 --force
+
+  - &run_coveralls
+    name: run_coveralls
+    command: |
+       source $WORKDIR/miniconda/etc/profile.d/conda.sh
+       conda activate $ENV_NAME
+       coveralls
+       conda deactivate
+
 jobs:
-  macos_libcf_py2:
-    macos:
-      xcode: "9.2.0"
-    environment:
-      WORKDIR: "test_macos_libcf_py2"
-      PY_VER: "py2"
-      CONDA_COMPILER: "clang_osx-64"
-    steps:
-      - checkout
-      - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *setup_libcf
-      - run: *run_libcf_tests
-      - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
-      - store_artifacts:
-          path: tests_png
-          destination: tests_png
+   macos_setup:
+      macos:
+         xcode: "11.1.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         LAST_STABLE: "1.0.3"
+      steps:
+         - checkout
+         - run: *setup_miniconda
+         - run: *conda_rerender
+         - persist_to_workspace:
+              root: .
+              paths: 
+                 - macos_build
 
-  macos_libcf_py3:
-    macos:
-      xcode: "9.2.0"
-    environment:
-      WORKDIR: "test_macos_libcf_py3"
-      PY_VER: "py3"
-      CONDA_COMPILER: "clang_osx-64"
-    steps:
-      - checkout
-      - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *setup_libcf
-      - run: *run_libcf_tests
-      - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
-      - store_artifacts:
-          path: tests_png
-          destination: tests_png
+   linux_setup:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         LAST_STABLE: "1.0.3"
+      steps:
+         - checkout
+         - run: *setup_miniconda
+         - run: *conda_rerender
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build
 
-  linux_libcf_py2:
-    machine:
-      image: circleci/classic
-    environment:
-      WORKDIR: "test_linux_libcf_py2"
-      PY_VER: "py2"
-      CONDA_COMPILER: "gcc_linux-64"
-    steps:
-      - checkout
-      - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *setup_libcf
-      - run: *run_libcf_tests
-      - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
-      - store_artifacts:
-          path: tests_png
-          destination: tests_png
+   macos_libcf_py36:
+      macos:
+         xcode: "11.1.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.6,<3.7"
+         BUILD_VARIANT_VER: "mpinompipython3.6"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - macos_build/miniconda/conda-bld/osx-64/libcf*tar.bz2
 
-  linux_libcf_py3:
-    machine:
-      image: circleci/classic
-    environment:
-      WORKDIR: "test_linux_libcf_py3"
-      PY_VER: "py3"
-      CONDA_COMPILER: "gcc_linux-64"
-      COVERAGE: "-c /home/circleci/project/tests/coverage.json"
-    steps:
-      - checkout
-      - run: pwd
-      - run: ls -l
-      - run: *setup_miniconda
-      - run: *create_conda_env
-      - run: *setup_libcf
-      - run: *run_libcf_tests
-      - run: *conda_upload
-      - store_artifacts:
-          path: tests_html
-          destination: tests_html
-      - store_artifacts:
-          path: tests_png
-          destination: tests_png
+   macos_libcf_py37:
+      macos:
+         xcode: "11.1.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.7,<3.8"
+         BUILD_VARIANT_VER: "mpinompipython3.7"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - macos_build/miniconda/conda-bld/osx-64/libcf*tar.bz2
+
+   macos_libcf_py38:
+      macos:
+         xcode: "11.1.0"
+      environment:
+         WORKDIR: /Users/distiller/project/macos_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.8,<3.9"
+         BUILD_VARIANT_VER: "mpinompipython3.8"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - macos_build/miniconda/conda-bld/osx-64/libcf*tar.bz2
+
+   linux_libcf_py36:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.6,<3.7"
+         BUILD_VARIANT_VER: "mpinompipython3.6"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build/miniconda/conda-bld/linux-64/libcf*tar.bz2
+
+   linux_libcf_py37:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.7,<3.8"
+         BUILD_VARIANT_VER: "mpinompipython3.7"
+         COVERAGE: "-c /home/circleci/project/tests/coverage.json"
+         COVERAGE_PKGS: "coverage coveralls"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build/miniconda/conda-bld/linux-64/libcf*tar.bz2
+
+   linux_libcf_py38:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "libcf"
+         REPO_NAME: "libcf"
+         ENV_NAME: "test_libcf"
+         CONDA_PY_VER: "python>=3.8,<3.9"
+         BUILD_VARIANT_VER: "mpinompipython3.8"
+      steps:
+         - checkout
+         - attach_workspace:
+              at: .
+         - run: *conda_build
+         - persist_to_workspace:
+              root: .
+              paths:
+                 - linux_build/miniconda/conda-bld/linux-64/libcf*tar.bz2
+
+
+   upload:
+      machine:
+         image: circleci/classic:latest
+      environment:
+         WORKDIR: /home/circleci/project/linux_build
+         PKG_NAME: "libcf"
+         VERSION: "1.0.3"
+         USER: "cdat"
+         #LABEL: "nightly"
+         LABEL: "linatest"
+      steps:
+         - attach_workspace:
+              at: .
+         - run: pwd
+         - run: *conda_upload
 
 workflows:
-  version: 2
-  libcf_test:
-    jobs:
-      - macos_libcf_py2
-      - macos_libcf_py3:
-           requires:
-              - macos_libcf_py2
-      - linux_libcf_py2
-      - linux_libcf_py3:
-           requires:
-              - linux_libcf_py2
+   version: 2
+   libcf:
+      jobs:
+         - macos_setup
+         - linux_setup
+         - macos_libcf_py36:
+              requires:
+                 - macos_setup
+         - macos_libcf_py37:
+              requires:
+                 - macos_setup
+         - macos_libcf_py38:
+              requires:
+                 - macos_setup
+         - linux_libcf_py36:
+              requires:
+                 - linux_setup
+         - linux_libcf_py37:
+              requires:
+                 - linux_setup
+         - linux_libcf_py38:
+              requires:
+                 - linux_setup
+
+         - upload:
+              requires:
+                 - macos_libcf_py36
+                 - macos_libcf_py37
+                 - macos_libcf_py38
+                 - linux_libcf_py36
+                 - linux_libcf_py37
+                 - linux_libcf_py38
+
 
