@@ -117,7 +117,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.6,<3.7"
-         BUILD_VARIANT_VER: "mpinompipython3.6"
+         BUILD_VARIANT_VER: "3.6"
       steps:
          - checkout
          - attach_workspace:
@@ -137,7 +137,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.7,<3.8"
-         BUILD_VARIANT_VER: "mpinompipython3.7"
+         BUILD_VARIANT_VER: "3.7"
       steps:
          - checkout
          - attach_workspace:
@@ -157,7 +157,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.8,<3.9"
-         BUILD_VARIANT_VER: "mpinompipython3.8"
+         BUILD_VARIANT_VER: "3.8"
       steps:
          - checkout
          - attach_workspace:
@@ -177,7 +177,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.6,<3.7"
-         BUILD_VARIANT_VER: "mpinompipython3.6"
+         BUILD_VARIANT_VER: "3.6"
       steps:
          - checkout
          - attach_workspace:
@@ -197,7 +197,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.7,<3.8"
-         BUILD_VARIANT_VER: "mpinompipython3.7"
+         BUILD_VARIANT_VER: "3.7"
          COVERAGE: "-c /home/circleci/project/tests/coverage.json"
          COVERAGE_PKGS: "coverage coveralls"
       steps:
@@ -219,7 +219,7 @@ jobs:
          REPO_NAME: "libcf"
          ENV_NAME: "test_libcf"
          CONDA_PY_VER: "python>=3.8,<3.9"
-         BUILD_VARIANT_VER: "mpinompipython3.8"
+         BUILD_VARIANT_VER: "3.8"
       steps:
          - checkout
          - attach_workspace:
